@@ -4,23 +4,141 @@ using GymAvailabilityApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace GymAvailabilityApp.Data.Migrations
+namespace GymAvailabilityApp.Migrations
 {
-    [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(GymAvaiabilityDbContext))]
+    [Migration("20230404194448_AddingAllEssentialTables")]
+    partial class AddingAllEssentialTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.3")
+                .HasAnnotation("ProductVersion", "7.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("GymAvailabilityApp.Entities.AvaiabilityReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CurrentState")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MachineId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PreviousState")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AvaiabilityReports");
+                });
+
+            modelBuilder.Entity("GymAvailabilityApp.Entities.Gym", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Gyms");
+                });
+
+            modelBuilder.Entity("GymAvailabilityApp.Entities.GymRoom", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Floor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("GymId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoomFileLink")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GymRooms");
+                });
+
+            modelBuilder.Entity("GymAvailabilityApp.Entities.Machine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeviceEUI")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageFileLink")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Machines");
+                });
+
+            modelBuilder.Entity("GymAvailabilityApp.Entities.MachinePlacement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MachineId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MachinePlacements");
+                });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
@@ -51,22 +169,22 @@ namespace GymAvailabilityApp.Data.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "3cd2e66e-e8aa-4eda-8275-36c797447bc0",
-                            ConcurrencyStamp = "f0fe49b2-0a4c-48d5-a64a-fc422c958594",
+                            Id = "2e55398b-ec1a-49a5-a557-33ae69ad0624",
+                            ConcurrencyStamp = "a005cfae-bc8c-47af-8fd8-e8296a547367",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "03e0a4a9-ba76-4464-a944-50934f6bd437",
-                            ConcurrencyStamp = "30e66ef4-6d1e-4cdc-a6cc-c82a3d3875df",
+                            Id = "d037140f-121d-46c6-b584-ba47aa61bab2",
+                            ConcurrencyStamp = "14da8405-7a26-45f3-9545-2f09e4a07aa0",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "dae93dd2-c82b-403e-993d-bd1e50bc97e1",
-                            ConcurrencyStamp = "a37b53d5-5f13-4d6c-933c-d42b8637f1d1",
+                            Id = "4b727d62-cd6e-408d-a4b8-ba281c37cec2",
+                            ConcurrencyStamp = "ba0bf214-06fa-485b-b57e-5823106e8d53",
                             Name = "Employee",
                             NormalizedName = "EMPLOYEE"
                         });

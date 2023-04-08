@@ -1,0 +1,63 @@
+﻿@page "/machines/{machineId:int}"
+@inject IMachineService MachineService
+<h1>Machine Details</h1>
+<p>Machine details page</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Name
+            </th>
+            <th>
+                DeviceEUI
+            </th>
+            <th>
+                Description
+            </th>
+
+            <th>
+                State
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        <tr>
+            <td>
+                @machine.Name
+            </td>
+            <td>
+                @machine.DeviceEUI
+            </td>
+            <td>
+                @machine.Description
+            </td>
+            <td>
+                @if ((machine.IsOccupied??=false))
+                {
+                    <p>Unavailable</p>
+				}
+				else
+				{
+                    <p>Available</p>
+					
+				}
+            </td>
+        </tr>
+        
+    </tbody>
+</table>
+
+
+@code {
+    [Parameter]
+    public int machineId { get; set; }
+
+    private MachineModel? machine = new MachineModel();
+    protected override async Task OnInitializedAsync()
+    {
+        machine = await MachineService.GetMachine(machineId);
+        
+
+    }
+}

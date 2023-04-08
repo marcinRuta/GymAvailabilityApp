@@ -1,5 +1,8 @@
+
 using GymAvailabilityApp.Areas.Identity;
 using GymAvailabilityApp.Data;
+using GymAvailabilityApp.Services;
+using GymAvailabilityApp.Services.Contracts;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -18,16 +21,16 @@ var conStrBuilder = new SqlConnectionStringBuilder(
 conStrBuilder.Password = builder.Configuration["MainDatabasePassword"];
 var connectionString = conStrBuilder.ConnectionString;
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<GymAvaiabilityDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<GymAvaiabilityDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
-builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddScoped<IMachineService, MachineService>();
 
 var app = builder.Build();
 
