@@ -10,5 +10,7 @@ namespace GymAvailabilityApp.Entities
 
         [ForeignKey("MachineId")]
         public int MachineId { get; set; }
+        [ForeignKey("GymRoomId")]
+        public int GymRoomId { get; set; } 
     }
 }

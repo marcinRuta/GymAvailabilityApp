@@ -1,0 +1,19 @@
+﻿@page "/gym"
+@inject IMachineService MachineService
+
+<h3>@gym.Name</h3>
+
+<GymRoom GymRooms=gymRooms ></GymRoom>
+@code {
+    private GymModel? gym = new GymModel();
+
+    private List<GymRoomModel>? gymRooms = new List<GymRoomModel>();
+    protected override async Task OnInitializedAsync()
+    {
+        gymRooms = await MachineService.GetGymRooms();
+        gym = await MachineService.GetGym(1);
+
+
+    }
+
+}

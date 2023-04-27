@@ -10,6 +10,9 @@ namespace GymAvailabilityApp.Services.Contracts
         Task<MachineModel> CreateMachine(MachineModel machine);
         Task<MachineModel> UpdateMachine(MachineModel machine);
         Task<MachineModel> DeleteMachine(int id);
+        Task<List<GymRoomModel>> GetGymRooms();
+        Task<GymModel> GetGym(int id);
     
     }
 }
+    

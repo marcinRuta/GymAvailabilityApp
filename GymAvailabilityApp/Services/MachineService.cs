@@ -24,33 +24,78 @@ namespace GymAvailabilityApp.Services
             throw new NotImplementedException();
         }
 
+        public async Task<GymModel> GetGym(int id)
+        {
+            return await (from gym in this.gymAvaiabilityDbContext.Gyms
+                          where gym.Id == id
+                          select new GymModel
+                          {
+                              Id = gym.Id,
+                              Name = gym.Name
+                          }).SingleOrDefaultAsync();
+        }
+
+        public async Task<List<GymRoomModel>> GetGymRooms()
+        {
+            var returnedGymFloors = await (from gymRoom in this.gymAvaiabilityDbContext.GymRooms
+                                           select new GymRoomModel
+                                           {
+                                               Id = gymRoom.Id,
+                                               Name = gymRoom.Name,
+                                               Floor = gymRoom.Floor,
+                                               RoomFileLink = gymRoom.RoomFileLink
+                                           }).ToListAsync();
+            if (returnedGymFloors.Any())
+            {
+                foreach (var gymFloor in returnedGymFloors)
+                {
+                    gymFloor.GymRoomMachines = await (from machinePlacement in this.gymAvaiabilityDbContext.MachinePlacements
+                                                      where machinePlacement.GymRoomId == gymFloor.Id
+                                                      join machine in this.gymAvaiabilityDbContext.Machines
+                                                        on machinePlacement.MachineId equals machine.Id
+                                                      select new MachineModel
+                                                      {
+                                                          Id = machine.Id,
+                                                          Name = machine.Name,
+                                                          ImageFileLink = machine.ImageFileLink,
+                                                          Description = machine.Description,
+                                                          DeviceEUI = machine.DeviceEUI
+                                                      }).ToListAsync();
+
+                }
+
+            }
+            return returnedGymFloors;
+
+        }
+
         public async Task<MachineModel> GetMachine(int id)
         {
             var returnedMachine = await (from machine in this.gymAvaiabilityDbContext.Machines
-                                 where machine.Id == id
-                                 select new MachineModel
-                                 {
-                                     Id = machine.Id,
-                                     Name = machine.Name,
-                                     ImageFileLink = machine.ImageFileLink,
-                                     Description = machine.Description,
-                                     DeviceEUI = machine.DeviceEUI
-                                 }).SingleOrDefaultAsync();
+                                         where machine.Id == id
+                                         select new MachineModel
+                                         {
+                                             Id = machine.Id,
+                                             Name = machine.Name,
+                                             ImageFileLink = machine.ImageFileLink,
+                                             Description = machine.Description,
+                                             DeviceEUI = machine.DeviceEUI
+                                         }).SingleOrDefaultAsync();
             if (returnedMachine == null)
             {
                 return returnedMachine;
             }
             var returnedAvaiabilityReport = await (from avaiabilityReport in this.gymAvaiabilityDbContext.AvaiabilityReports
-                                           where avaiabilityReport.MachineId == id
-                                           orderby avaiabilityReport.Timestamp descending
-                                           select new AvaiabilityReportModel
-                                           {
-                                               Id = avaiabilityReport.Id,
-                                               CurrentState = avaiabilityReport.CurrentState,
-                                               PreviousState = avaiabilityReport.PreviousState,
-                                               Timestamp = avaiabilityReport.Timestamp     
-                                           }).FirstOrDefaultAsync();
-            if(returnedAvaiabilityReport == null)
+                                                   where avaiabilityReport.MachineId == id
+                                                   orderby avaiabilityReport.Timestamp descending
+                                                   select new AvaiabilityReportModel
+                                                   {
+                                                       Id = avaiabilityReport.Id,
+                                                       CurrentState = avaiabilityReport.CurrentState,
+                                                       PreviousState = avaiabilityReport.PreviousState,
+                                                       Timestamp = avaiabilityReport.Timestamp
+                                                   }).FirstOrDefaultAsync();
+            if (returnedAvaiabilityReport == null)
             {
                 returnedMachine.IsOccupied = false;
                 return returnedMachine;
@@ -62,16 +107,16 @@ namespace GymAvailabilityApp.Services
 
         public async Task<List<MachineModel>> GetMachines()
         {
-           var machines = await ( from machine in this.gymAvaiabilityDbContext.Machines
+            var machines = await (from machine in this.gymAvaiabilityDbContext.Machines
                                   select new MachineModel
                                   {
-                                        Id = machine.Id,
-                                        Name = machine.Name,
-                                        ImageFileLink = machine.ImageFileLink,
-                                        Description = machine.Description,
-                                        DeviceEUI = machine.DeviceEUI
+                                      Id = machine.Id,
+                                      Name = machine.Name,
+                                      ImageFileLink = machine.ImageFileLink,
+                                      Description = machine.Description,
+                                      DeviceEUI = machine.DeviceEUI
                                   }).ToListAsync();
-            if (machines !=null )
+            if (machines != null)
             {
                 return machines;
             }

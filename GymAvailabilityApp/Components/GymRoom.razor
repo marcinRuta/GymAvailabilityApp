@@ -1,0 +1,103 @@
+﻿
+
+@if(GymRooms != null)
+{
+    <Tabs RenderMode="TabsRenderMode.LazyReload" >
+        <Items>
+            @foreach (var gymRoom in GymRooms)
+            {
+                <Tab Name="@gymRoom.Name">@gymRoom.Name</Tab>
+            }
+        </Items>
+        <Content>
+            @foreach (var gymRoom in GymRooms)
+            {
+                <TabPanel Name="@gymRoom.Name">
+                    <Card>
+
+
+                        <CardBody>
+                            <CardTitle Size="3">
+                                @gymRoom.Name
+                            </CardTitle>
+                            <CardText>
+                                <Table Narrow>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHeaderCell>Nazwa </TableHeaderCell>
+                                        <TableHeaderCell>Opis</TableHeaderCell>
+                                        <TableHeaderCell>Stan </TableHeaderCell>
+                                        <TableHeaderCell> </TableHeaderCell>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    @foreach (var machine in gymRoom.GymRoomMachines)
+                                        {
+                                            <TableRow >
+                                                <TableRowCell>@machine.Name</TableRowCell>
+                                                <TableRowCell>@machine.Description</TableRowCell>
+                                                <TableRowCell>
+                                                    @if ((machine.IsOccupied ??= false))
+                                                    {
+                                                        <Badge Color="Color.Danger">
+                                                            <Tooltip Text="Unavaiable">
+                                                                <Icon Name="IconName.Times" aria-label="Unavaiable" />
+
+                                                            </Tooltip>
+                                                        </Badge>
+                                                    }
+                                                    else
+                                                    {
+                                                        <Badge Color="Color.Success">
+                                                            <Tooltip Text="Avaiable">
+                                                                <Icon Name="IconName.Check" aria-label="Unavaiable" />
+
+                                                            </Tooltip>
+                                                        </Badge>
+
+                                                    }
+                                                </TableRowCell>
+
+                                                <TableRowCell>
+                                                    <Button Color="Color.Primary" Clicked="@(e => ShowMachineDetailsModal(machine))" >Szczegóły </Button> 
+                                                </TableRowCell>
+                                            </TableRow>
+                                        }
+                                    </TableBody>
+                                </Table>
+                            </CardText>
+                        </CardBody>
+                        @if (gymRoom != null && gymRoom.RoomFileLink != null)
+                        {
+                            <CardImage Source="@gymRoom.RoomFileLink" Alt="Placeholder image" />
+
+
+                        }
+                    </Card>
+                </TabPanel>
+            }
+        </Content>
+    </Tabs>
+}
+else
+{
+    <Heading Size="HeadingSize.Is1">Wystąpił błąd</Heading>
+    <Heading Size="HeadingSize.Is4" Color="Color.Danger">Nie znaleziono dostępnych sal</Heading>
+
+}
+
+
+@code {
+
+    [Inject] public IModalService ModalService { get; set; }
+    Task ShowMachineDetailsModal(MachineModel machineModel)
+    {
+        ModalService.Show<MachineDetailsModal>(parameters => parameters.Add(x => x.Machine, machineModel), new ModalInstanceOptions() { UseModalStructure = false });
+        return Task.CompletedTask;
+    }
+
+    [Parameter]
+    public List<GymRoomModel> GymRooms { get; set; }
+   
+
+}
