@@ -24,6 +24,27 @@ namespace GymAvailabilityApp.Services
             throw new NotImplementedException();
         }
 
+        public async Task<List<MachineAvaiabilityFactModel>> GetAvaiabilityFacts(int machineId, string startDate, string endDate)
+        {
+            var returnedMachineAvaiabilityFacts = await (from machineAvaiabilityFact in this.gymAvaiabilityDbContext.avaiabilityReportFactSts
+                                                         where machineAvaiabilityFact.MachineId == machineId
+                                                         && DateTime.Parse(machineAvaiabilityFact.Date) >= DateTime.Parse(startDate)
+                                                         && DateTime.Parse(machineAvaiabilityFact.Date) <= DateTime.Parse(endDate)
+                                                         select new MachineAvaiabilityFactModel
+                                                         {
+                                                             Id = machineAvaiabilityFact.Id,
+                                                             Occupancy = machineAvaiabilityFact.Occuppancy,
+                                                             Timestamp = machineAvaiabilityFact.Timestamp,
+                                                             MachineId = machineAvaiabilityFact.MachineId,
+                                                             GymRoomId = machineAvaiabilityFact.GymRoomId,
+                                                             Date = machineAvaiabilityFact.Date
+                                                         }).ToListAsync();
+
+            return returnedMachineAvaiabilityFacts;
+
+
+        }
+
         public async Task<GymModel> GetGym(int id)
         {
             return await (from gym in this.gymAvaiabilityDbContext.Gyms

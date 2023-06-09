@@ -1,0 +1,32 @@
+﻿@page "/statistics"
+@inject IMachineService MachineService
+<Card>
+    <CardBody>
+        <CardTitle Size="3">
+            Welcome to statistics segemnt of the Gym Availability App
+        </CardTitle>
+        <CardText>
+            Please chose the machine you want to see the statistics for and the time period
+        </CardText>
+        <SelectList TItem="MachineModel"
+            TValue="int"
+            Data="@machines"
+            TextField="@((item)=>item.Name)"
+            ValueField="@((item)=>item.Id)"
+            @bind-SelectedValue="@selectedListValue"
+            DefaultItemText="Choose your country" />
+    </CardBody>
+</Card>
+
+<DailyMachineChart></DailyMachineChart>
+@code {
+    int selectedListValue { get; set; } = 3;
+    private IEnumerable<MachineModel>? machines = new List<MachineModel>();
+    protected override async Task OnInitializedAsync()
+    {
+        machines = await MachineService.GetMachines();
+
+
+    }
+
+}

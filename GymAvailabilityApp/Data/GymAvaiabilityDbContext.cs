@@ -28,6 +28,7 @@ namespace GymAvailabilityApp.Data
         public DbSet<Gym> Gyms { get; set; }
         public DbSet<GymRoom> GymRooms { get; set; }
         public DbSet<MachinePlacement> MachinePlacements { get; set; }
+        public DbSet<AvaiabilityReportFactSt> avaiabilityReportFactSts { get; set; }
 
     }
 }

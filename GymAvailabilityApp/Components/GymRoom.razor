@@ -1,15 +1,28 @@
-﻿
-
-@if(GymRooms != null)
+﻿@if (GymRooms != null)
 {
-    <Tabs RenderMode="TabsRenderMode.LazyReload" >
-        <Items>
+    <Tabs RenderMode="TabsRenderMode.LazyReload" Background="Background.Light" SelectedTab="Home" Pills="true" TextColor="TextColor.Light" >
+        <Items> 
+            <Tab Name=Home >Home</Tab>
+
             @foreach (var gymRoom in GymRooms)
             {
                 <Tab Name="@gymRoom.Name">@gymRoom.Name</Tab>
             }
         </Items>
         <Content>
+            <TabPanel Name="Home">
+                <Card>
+                    <CardBody>
+                        <CardTitle Size="3">
+                            Welcome to the Gym Availability App
+                        </CardTitle>
+                        <CardText>
+                            This app is designed to help you find the best time to go to the gym. It will show you which machines are available in each room of the gym.
+                        </CardText>
+                    </CardBody>
+                </Card>
+            </TabPanel>
+
             @foreach (var gymRoom in GymRooms)
             {
                 <TabPanel Name="@gymRoom.Name">
@@ -24,16 +37,16 @@
                                 <Table Narrow>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHeaderCell>Nazwa </TableHeaderCell>
-                                        <TableHeaderCell>Opis</TableHeaderCell>
-                                        <TableHeaderCell>Stan </TableHeaderCell>
+                                        <TableHeaderCell>Name </TableHeaderCell>
+                                        <TableHeaderCell>Description</TableHeaderCell>
+                                        <TableHeaderCell>Availability </TableHeaderCell>
                                         <TableHeaderCell> </TableHeaderCell>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     @foreach (var machine in gymRoom.GymRoomMachines)
                                         {
-                                            <TableRow >
+                                            <TableRow>
                                                 <TableRowCell>@machine.Name</TableRowCell>
                                                 <TableRowCell>@machine.Description</TableRowCell>
                                                 <TableRowCell>
@@ -50,7 +63,7 @@
                                                     {
                                                         <Badge Color="Color.Success">
                                                             <Tooltip Text="Avaiable">
-                                                                <Icon Name="IconName.Check" aria-label="Unavaiable" />
+                                                                <Icon Name="IconName.Check" aria-label="Avaiable" />
 
                                                             </Tooltip>
                                                         </Badge>
@@ -59,7 +72,7 @@
                                                 </TableRowCell>
 
                                                 <TableRowCell>
-                                                    <Button Color="Color.Primary" Clicked="@(e => ShowMachineDetailsModal(machine))" >Szczegóły </Button> 
+                                                    <Button Color="Color.Primary" Clicked="@(e => ShowMachineDetailsModal(machine))">Details </Button>
                                                 </TableRowCell>
                                             </TableRow>
                                         }
@@ -81,8 +94,8 @@
 }
 else
 {
-    <Heading Size="HeadingSize.Is1">Wystąpił błąd</Heading>
-    <Heading Size="HeadingSize.Is4" Color="Color.Danger">Nie znaleziono dostępnych sal</Heading>
+    <Heading Size="HeadingSize.Is1">Error occured</Heading>
+    <Heading Size="HeadingSize.Is4" Color="Color.Danger">Rooms have not been found</Heading>
 
 }
 
@@ -98,6 +111,6 @@ else
 
     [Parameter]
     public List<GymRoomModel> GymRooms { get; set; }
-   
+
 
 }

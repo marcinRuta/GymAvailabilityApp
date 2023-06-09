@@ -12,6 +12,7 @@ namespace GymAvailabilityApp.Services.Contracts
         Task<MachineModel> DeleteMachine(int id);
         Task<List<GymRoomModel>> GetGymRooms();
         Task<GymModel> GetGym(int id);
+        Task<List<MachineAvaiabilityFactModel>> GetAvaiabilityFacts(int machineId, string startDate, string EndDate);
     
     }
 }
