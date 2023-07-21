@@ -1,0 +1,95 @@
+﻿@inject IMachineService MachineService
+@inject IModalService ModalService
+<DataGrid TItem="GymRoomModel"
+          Data="@gymRoomsList"
+          @bind-SelectedRow="@selectedGymRoom"
+          Editable
+          RowInserted="@OnRowInserted"
+          RowUpdated="@OnRowUpdated"
+          RowRemoved="@OnRowRemoved"
+          Responsive
+          ShowPager
+          CommandMode="DataGridCommandMode.ButtonRow">
+    <DataGridColumns>
+        <DataGridColumn Field="@nameof(GymRoomModel.Id)" Caption="#" Sortable="false" />
+        <DataGridColumn Field="@nameof(GymRoomModel.Name)" Caption="Name" Editable Sortable="false" />
+        <DataGridColumn Field="@nameof(GymRoomModel.Floor)" Caption="Floor" Editable>
+            <EditTemplate>
+
+                <Select TValue="string" SelectedValue="@((string)context.CellValue)" SelectedValueChanged="@(v => context.CellValue = v)">
+                    <SelectItem Value=@("First Floor")>First Floor</SelectItem>
+                    <SelectItem Value=@("Second Floor")>Second Floor</SelectItem>
+                </Select>
+
+            </EditTemplate>
+        </DataGridColumn>
+        <DataGridColumn Field="@nameof(GymRoomModel.RoomFileLink)" Caption="Image">
+            <DisplayTemplate>
+                @{
+                    var gymRoomImage = (context as GymRoomModel)?.RoomFileLink;
+
+                    if (gymRoomImage != null)
+                    {
+                        <Icon Name="IconName.Check" aria-label="Avaiable" />
+                    }
+                    else
+                    {
+                        <Icon Name="IconName.Times" aria-label="Unavaiable" />
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+    </DataGridColumns>
+    <ButtonRowTemplate>
+        <Button Color="Color.Success" Clicked="context.NewCommand.Clicked">New</Button>
+        <Button Color="Color.Primary" Disabled="(selectedGymRoom is null)" Clicked="context.EditCommand.Clicked">Edit</Button>
+        <Button Color="Color.Danger" Disabled="(selectedGymRoom is null)" Clicked="context.DeleteCommand.Clicked">Delete</Button>
+        <Button Color="Color.Dark" Disabled="(selectedGymRoom is null)" Clicked="@(e => ShowGymRoomImageModal(selectedGymRoom))">Add Image</Button>
+    </ButtonRowTemplate>
+</DataGrid>
+@code {
+
+
+    private GymRoomModel selectedGymRoom;
+    private List<GymRoomModel>? gymRoomsList = new List<GymRoomModel>();
+    Task ShowGymRoomImageModal(GymRoomModel gymRoomModel)
+    {
+        ModalService.Show<GymRoomImageModal>(parameters => parameters.Add(x => x.GymRoomModel, gymRoomModel), new ModalInstanceOptions() { UseModalStructure = false });
+
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        gymRoomsList = await MachineService.GetGymRooms();
+
+
+
+    }
+    async Task OnRowInserted(SavedRowItem<GymRoomModel, Dictionary<string, object>> e)
+    {
+        var gymRoom = e.Item;
+        if(gymRoom.Floor == null)
+        {
+            gymRoom.Floor = "First Floor";
+        }
+        await MachineService.CreateGymRoom(gymRoom);
+        gymRoomsList = await MachineService.GetGymRooms();
+        StateHasChanged();
+    }
+    async Task OnRowUpdated(SavedRowItem<GymRoomModel, Dictionary<string, object>> e)
+    {
+        var gymRoom = e.Item;
+        await MachineService.UpdateGymRoom(gymRoom);
+        gymRoomsList = await MachineService.GetGymRooms();
+        StateHasChanged();
+    }
+
+    async Task OnRowRemoved(GymRoomModel gymRoom)
+    {
+        await MachineService.DeleteGymRoom(gymRoom.Id);
+        gymRoomsList = await MachineService.GetGymRooms();
+        StateHasChanged();
+    }
+
+}

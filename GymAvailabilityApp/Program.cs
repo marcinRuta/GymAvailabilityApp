@@ -7,12 +7,15 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
+using Syncfusion.Blazor;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,15 +26,17 @@ var conStrBuilder = new SqlConnectionStringBuilder(
         builder.Configuration.GetConnectionString("MainDatabaseConnection")) ?? throw new InvalidOperationException("Connection string 'MainDatabaseConnection' not found."); ;
 conStrBuilder.Password = builder.Configuration["MainDatabasePassword"];
 var connectionString = conStrBuilder.ConnectionString;
+Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(builder.Configuration["SyncfusionKey"]);
 
 builder.Services.AddDbContext<GymAvaiabilityDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<GymAvaiabilityDbContext>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddSyncfusionBlazor();
 builder.Services
     .AddBlazorise(options =>
     {
@@ -41,6 +46,10 @@ builder.Services
     .AddFontAwesomeIcons();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<IdentityUser>>();
 builder.Services.AddScoped<IMachineService, MachineService>();
+builder.Services.AddTransient<IEmailSender, EmailSenderService>();
+builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
+builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+
 
 var app = builder.Build();
 

@@ -6,21 +6,64 @@
             Welcome to statistics segemnt of the Gym Availability App
         </CardTitle>
         <CardText>
-            Please chose the machine you want to see the statistics for and the time period
+            Please chose the machine you want to see the statistics for and the day
         </CardText>
-        <SelectList TItem="MachineModel"
-            TValue="int"
-            Data="@machines"
-            TextField="@((item)=>item.Name)"
-            ValueField="@((item)=>item.Id)"
-            @bind-SelectedValue="@selectedListValue"
-            DefaultItemText="Choose your country" />
+        <Row>
+            <Column ColumnSize="ColumnSize.Is6">
+                <SelectList TItem="MachineModel"
+                            TValue="int"
+                            Data="@machines"
+                            TextField="@((item)=>item.Name)"
+                            ValueField="@((item)=>item.Id)"
+                            @bind-SelectedValue="@selectedItem"
+                            DefaultItemText="Choose machine" />
+            </Column>
+            <Column>
+                <Addons>
+                    <Addon AddonType="AddonType.Body">
+                        <DatePicker @ref="@datePicker" TValue="DateTime?" />
+                    </Addon>
+                    <Addon AddonType="AddonType.End">
+                        <Button Color="Color.Light" Clicked="@(()=>datePicker.ToggleAsync())">
+                            <Icon Name="IconName.CalendarDay" />
+                        </Button>
+                    </Addon>
+                </Addons>
+
+            </Column>
+
+        </Row>
+        <Row>
+            <Column>
+                <Button Color="Color.Primary" Clicked="@OnShowStatisticsButton">Show statistics</Button>
+            </Column>
+        </Row>
     </CardBody>
 </Card>
+@if (showGraph)
+{
+    <DailyMachineChart avaiabilityReports="@statistics"></DailyMachineChart>
+}
+else if (showNoDataMessage)
+{
+    <Card>
+        <CardBody>
+            <CardTitle Size="3">
+                No data for the selected time period
+            </CardTitle>
+        </CardBody>
+    </Card>
+}
 
-<DailyMachineChart></DailyMachineChart>
+
+
 @code {
-    int selectedListValue { get; set; } = 3;
+    Boolean showGraph { get; set; } = false;
+    Boolean showNoDataMessage { get; set; } = false;
+    int selectedItem { get; set; } = 0;
+    private List<MachineAvaiabilityFactModel> statistics;
+
+    DatePicker<DateTime?> datePicker;
     private IEnumerable<MachineModel>? machines = new List<MachineModel>();
     protected override async Task OnInitializedAsync()
     {
@@ -28,5 +71,26 @@
 
 
     }
+    async Task OnShowStatisticsButton()
+    {
+
+        var statistics = await MachineService.GetAvaiabilityFacts(selectedItem, datePicker.Date.ToString(), datePicker.Date.ToString());
+        if (statistics.Count != 0)
+        {
+            this.statistics = statistics;
+            showGraph = true;
+            showNoDataMessage = false;
+            InvokeAsync(StateHasChanged);
+        }
+        else
+        {
+            showNoDataMessage = true;
+            showGraph = false;
+            InvokeAsync(StateHasChanged);
+        }
+
+
+    }
+
 
 }

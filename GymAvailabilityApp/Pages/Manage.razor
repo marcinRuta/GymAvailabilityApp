@@ -1,0 +1,22 @@
+﻿@page "/manage"
+
+
+
+<Tabs RenderMode="TabsRenderMode.LazyReload" SelectedTab="tab1">
+    <Items>
+        <Tab Name="gymRoomGrid">Gym Rooms</Tab>
+        <Tab Name="machineGrid">Machines</Tab>
+    </Items>
+    <Content>
+        <TabPanel Name="gymRoomGrid">
+            <GymRoomGrid />
+        </TabPanel>
+        <TabPanel Name="machineGrid">
+            <MachineGrid />
+        </TabPanel>
+    </Content>
+</Tabs>
+
+@code {
+
+}

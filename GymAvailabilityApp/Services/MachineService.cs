@@ -1,4 +1,5 @@
 ﻿using GymAvailabilityApp.Data;
+using GymAvailabilityApp.Entities;
 using GymAvailabilityApp.Models;
 using GymAvailabilityApp.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
@@ -14,26 +15,64 @@ namespace GymAvailabilityApp.Services
             this.gymAvaiabilityDbContext = gymAvaiabilityDbContext;
         }
 
-        public Task<MachineModel> CreateMachine(MachineModel machine)
+        public async Task<GymRoom> CreateGymRoom(GymRoomModel gymRoom)
         {
-            throw new NotImplementedException();
+            var newGymRoom = new GymRoom
+            {
+                Name = gymRoom.Name,
+                Floor = gymRoom.Floor,
+                RoomFileLink = gymRoom.RoomFileLink
+            };
+            var result = await this.gymAvaiabilityDbContext.GymRooms.AddAsync(newGymRoom);
+            await this.gymAvaiabilityDbContext.SaveChangesAsync();
+            return result.Entity;
+
         }
 
-        public Task<MachineModel> DeleteMachine(int id)
+        public async Task<GymRoom> DeleteGymRoom(int id)
         {
-            throw new NotImplementedException();
+            var gymRoomToDelete = await this.gymAvaiabilityDbContext.GymRooms.FirstOrDefaultAsync(gymRoom => gymRoom.Id == id);
+            if (gymRoomToDelete != null)
+            {
+                this.gymAvaiabilityDbContext.GymRooms.Remove(gymRoomToDelete);
+                await this.gymAvaiabilityDbContext.SaveChangesAsync();
+                return gymRoomToDelete;
+            }
+            return null;
+
+        }
+        public async Task<GymRoom> UpdateGymRoom(GymRoomModel gymRoom)
+        {
+            // write a code to update gymRoom object in database 
+            var gymRoomToUpdate = await this.gymAvaiabilityDbContext.GymRooms.FirstOrDefaultAsync(_gymRoom => _gymRoom.Id == gymRoom.Id);
+            if (gymRoomToUpdate != null)
+            {
+                gymRoomToUpdate.GymId = '1';
+                gymRoomToUpdate.Name = gymRoom.Name;
+                gymRoomToUpdate.Floor = gymRoom.Floor;
+                gymRoomToUpdate.RoomFileLink = gymRoom.RoomFileLink;
+                await this.gymAvaiabilityDbContext.SaveChangesAsync();
+                return gymRoomToUpdate;
+            }
+            return null;
+
         }
 
         public async Task<List<MachineAvaiabilityFactModel>> GetAvaiabilityFacts(int machineId, string startDate, string endDate)
         {
-            var returnedMachineAvaiabilityFacts = await (from machineAvaiabilityFact in this.gymAvaiabilityDbContext.avaiabilityReportFactSts
+
+
+
+            var newStartDate = DateTime.Parse(startDate);
+            var newEndDate = DateTime.Parse(endDate);
+            var returnedMachineAvaiabilityFacts = await (from machineAvaiabilityFact in this.gymAvaiabilityDbContext.AvaiabilityReportFactSt
                                                          where machineAvaiabilityFact.MachineId == machineId
-                                                         && DateTime.Parse(machineAvaiabilityFact.Date) >= DateTime.Parse(startDate)
-                                                         && DateTime.Parse(machineAvaiabilityFact.Date) <= DateTime.Parse(endDate)
+                                                         && machineAvaiabilityFact.Date >= newStartDate
+                                                         && machineAvaiabilityFact.Date <= newEndDate
                                                          select new MachineAvaiabilityFactModel
                                                          {
                                                              Id = machineAvaiabilityFact.Id,
-                                                             Occupancy = machineAvaiabilityFact.Occuppancy,
+                                                             Occupancy = machineAvaiabilityFact.Occupancy,
                                                              Timestamp = machineAvaiabilityFact.Timestamp,
                                                              MachineId = machineAvaiabilityFact.MachineId,
                                                              GymRoomId = machineAvaiabilityFact.GymRoomId,
@@ -129,13 +168,22 @@ namespace GymAvailabilityApp.Services
         public async Task<List<MachineModel>> GetMachines()
         {
             var machines = await (from machine in this.gymAvaiabilityDbContext.Machines
+                                  join machinePlacement in this.gymAvaiabilityDbContext.MachinePlacements
+                                    on machine.Id equals machinePlacement.MachineId
+                                  join gymRoom in this.gymAvaiabilityDbContext.GymRooms
+                                    on machinePlacement.GymRoomId equals gymRoom.Id
+
                                   select new MachineModel
                                   {
                                       Id = machine.Id,
                                       Name = machine.Name,
                                       ImageFileLink = machine.ImageFileLink,
                                       Description = machine.Description,
-                                      DeviceEUI = machine.DeviceEUI
+                                      DeviceEUI = machine.DeviceEUI,
+                                      GymRoomId = gymRoom.Id,
+                                      GymRoomName = gymRoom.Name,
+                                      MachinePlacementDescription = machinePlacement.Description,
+
                                   }).ToListAsync();
             if (machines != null)
             {
@@ -147,9 +195,86 @@ namespace GymAvailabilityApp.Services
             }
         }
 
-        public Task<MachineModel> UpdateMachine(MachineModel machine)
+
+
+        public async Task<Machine> UpdateMachine(MachineModel machine)
         {
-            throw new NotImplementedException();
+            var machineToUpdate = this.gymAvaiabilityDbContext.Machines.FirstOrDefault(_machine => _machine.Id == machine.Id);
+            var machinePlacement = this.gymAvaiabilityDbContext.MachinePlacements.FirstOrDefault(_machinePlacement => _machinePlacement.MachineId == machine.Id);
+            if (machineToUpdate != null)
+            {
+                machineToUpdate.DeviceEUI = machine.DeviceEUI;
+                machineToUpdate.Name = machine.Name;
+                machineToUpdate.Description = machine.Description;
+                machineToUpdate.ImageFileLink = machine.ImageFileLink;
+                if (machinePlacement == null)
+                {
+                    var newMachinePlacement = new MachinePlacement
+                    {
+                        GymRoomId = machine.GymRoomId,
+                        MachineId = machine.Id,
+                        Description = machine.MachinePlacementDescription
+                    };
+
+                }
+                else
+                {
+                    machinePlacement.GymRoomId = machine.GymRoomId;
+                    machinePlacement.Description = machine.MachinePlacementDescription;
+                }
+                await this.gymAvaiabilityDbContext.SaveChangesAsync();
+                return machineToUpdate;
+            }
+            return null;
+        }
+        public async Task<Machine> DeleteMachine(int id)
+        {
+            var machineToBeDeleted = this.gymAvaiabilityDbContext.Machines.FirstOrDefault(_machine => _machine.Id == id);
+            var machinePlacementToBeDeleted = this.gymAvaiabilityDbContext.MachinePlacements.FirstOrDefault(_machinePlacement => _machinePlacement.MachineId == machineToBeDeleted.Id);
+
+            if (machineToBeDeleted != null)
+            {
+
+                this.gymAvaiabilityDbContext.Machines.Remove(machineToBeDeleted);
+                if (machinePlacementToBeDeleted !=null)
+                {
+                    this.gymAvaiabilityDbContext.MachinePlacements.Remove(machinePlacementToBeDeleted);
+                }
+                await this.gymAvaiabilityDbContext.SaveChangesAsync();
+                return machineToBeDeleted;
+            }
+            return null;
+
+
+        }
+
+        public async Task<Machine> CreateMachine(MachineModel machine)
+        {
+            var newMachine = new Machine
+            {
+                Description = machine.Description,
+                DeviceEUI = machine.DeviceEUI,
+                Name = machine.Name
+
+            };
+            var result = await this.gymAvaiabilityDbContext.Machines.AddAsync(newMachine);
+            await this.gymAvaiabilityDbContext.SaveChangesAsync();
+
+            if (machine.GymRoomId != null)
+            {
+                var newMachinePlacement = new MachinePlacement
+                {
+                    GymRoomId = machine.GymRoomId,
+                    MachineId = result.Entity.Id,
+                    Description = machine.MachinePlacementDescription
+                };
+                await this.gymAvaiabilityDbContext.MachinePlacements.AddAsync(newMachinePlacement);
+
+            }
+            await this.gymAvaiabilityDbContext.SaveChangesAsync();
+            return result.Entity;
+
         }
     }
+
 }

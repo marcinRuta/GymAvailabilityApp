@@ -1,4 +1,5 @@
 ﻿
+using GymAvailabilityApp.Entities;
 using GymAvailabilityApp.Models;
 
 namespace GymAvailabilityApp.Services.Contracts
@@ -7,12 +8,16 @@ namespace GymAvailabilityApp.Services.Contracts
     {
         Task<List<MachineModel>> GetMachines();
         Task<MachineModel> GetMachine(int id);
-        Task<MachineModel> CreateMachine(MachineModel machine);
-        Task<MachineModel> UpdateMachine(MachineModel machine);
-        Task<MachineModel> DeleteMachine(int id);
+        Task<Machine> CreateMachine(MachineModel machine);
+        Task<Machine> UpdateMachine(MachineModel machine);
+        Task<Machine> DeleteMachine(int id);
         Task<List<GymRoomModel>> GetGymRooms();
+        Task<GymRoom> CreateGymRoom(GymRoomModel gymRoom);
+        Task<GymRoom> UpdateGymRoom(GymRoomModel gymRoom);
+        Task<GymRoom> DeleteGymRoom(int id);
         Task<GymModel> GetGym(int id);
         Task<List<MachineAvaiabilityFactModel>> GetAvaiabilityFacts(int machineId, string startDate, string EndDate);
+
     
     }
 }

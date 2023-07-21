@@ -1,0 +1,116 @@
+﻿@inject IMachineService MachineService
+@inject IModalService ModalService
+<DataGrid TItem="MachineModel"
+          Data="@machinesList"
+          @bind-SelectedRow="@selectedMachine"
+          Editable
+          RowInserted="@OnRowInserted"
+          RowUpdated="@OnRowUpdated"
+          RowRemoved="@OnRowRemoved"
+          UseValidation
+          Responsive
+          ShowPager
+          CommandMode="DataGridCommandMode.ButtonRow">
+    <DataGridColumns>
+        <DataGridColumn Field="@nameof(MachineModel.Id)" Caption="#" Sortable="false" />
+        <DataGridColumn Field="@nameof(MachineModel.Name)" Caption="Name" Validator="@CheckIfNotEmpty"  Editable Sortable="false" />
+        <DataGridColumn Field="@nameof(MachineModel.DeviceEUI)" Caption="Device EUI" Editable Sortable="false" />
+        <DataGridColumn Field="@nameof(MachineModel.Description)" Caption="Description" Editable />
+        <DataGridColumn Field="@nameof(MachineModel.GymRoomName)" Caption="Gym Room" Validator="@CheckIfNotEmpty" Editable>
+            <EditTemplate>
+
+                <Select TValue="string" SelectedValue="@((string)context.CellValue)" SelectedValueChanged="@(v => context.CellValue = v)">
+                    @{
+                        foreach (GymRoomModel gymRoom in gymRooms)
+                        {
+                            <SelectItem Value=@(gymRoom.Name)>@gymRoom.Name</SelectItem>
+                        }
+                    }
+
+                </Select>
+            </EditTemplate>
+        </DataGridColumn>
+        <DataGridColumn Field="@nameof(MachineModel.ImageFileLink)" Caption="Image">
+            <DisplayTemplate>
+                @{
+                    var machineImage = (context as MachineModel)?.ImageFileLink;
+
+                    if (machineImage != null)
+                    {
+                        <Icon Name="IconName.Check" aria-label="Avaiable" />
+                    }
+                    else
+                    {
+                        <Icon Name="IconName.Times" aria-label="Unavaiable" />
+                    }
+                }
+            </DisplayTemplate>
+        </DataGridColumn>
+        <DataGridColumn Field="@nameof(MachineModel.MachinePlacementDescription)"  Validator="@CheckIfNotEmpty" Caption="Placement" Editable />
+    </DataGridColumns>
+    <ButtonRowTemplate>
+        <Button Color="Color.Success" Clicked="context.NewCommand.Clicked">New</Button>
+        <Button Color="Color.Primary" Disabled="(selectedMachine is null)" Clicked="context.EditCommand.Clicked">Edit</Button>
+        <Button Color="Color.Danger" Disabled="(selectedMachine is null)" Clicked="context.DeleteCommand.Clicked">Delete</Button>
+        <Button Color="Color.Dark" Disabled="(selectedMachine is null)" Clicked="@(e => ShowMachineImageModal(selectedMachine))">Add Image</Button>
+    </ButtonRowTemplate>
+</DataGrid>
+@code {
+
+
+    private MachineModel selectedMachine;
+    private List<MachineModel>? machinesList = new List<MachineModel>();
+    private List<GymRoomModel>? gymRooms = new List<GymRoomModel>();
+    Task ShowMachineImageModal(MachineModel machineModel)
+    {
+        ModalService.Show<MachineImageModal>(parameters => parameters.Add(x => x.MachineModel, machineModel), new ModalInstanceOptions() { UseModalStructure = false });
+
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        machinesList = await MachineService.GetMachines();
+        gymRooms = await MachineService.GetGymRooms();
+
+
+
+    }
+    public void CheckIfNotEmpty(ValidatorEventArgs validationArgs)
+    {
+        ValidationRule.IsNotEmpty(validationArgs);
+
+        if (validationArgs.Status == ValidationStatus.Error)
+        {
+            validationArgs.ErrorText = "Field can't be empty.";
+        }
+    }
+    async Task OnRowInserted(SavedRowItem<MachineModel, Dictionary<string, object>> e)
+    {
+        var machine = e.Item;
+        var gymRoomName = (machine.GymRoomName !=null) ? machine.GymRoomName : gymRooms.FirstOrDefault().Name;
+
+
+        machine.GymRoomId = gymRooms.FirstOrDefault(x => x.Name == gymRoomName).Id;
+        await MachineService.CreateMachine(machine);
+        machinesList = await MachineService.GetMachines();
+        StateHasChanged();
+    }
+    async Task OnRowUpdated(SavedRowItem<MachineModel, Dictionary<string, object>> e)
+    {
+        var machine = e.Item;
+        await MachineService.UpdateMachine(machine);
+        machinesList = await MachineService.GetMachines();
+        StateHasChanged();
+
+    }
+
+    async Task OnRowRemoved(MachineModel machine)
+    {
+        await MachineService.DeleteMachine(machine.Id);
+        machinesList = await MachineService.GetMachines();
+        StateHasChanged();
+
+    }
+
+}

@@ -5,33 +5,47 @@
              ThemeContrast="ThemeContrast.Light">
             <BarToggler />
             <BarMenu>
-               
+
                 <BarEnd>
 
                     <BarItem>
                         <BarDropdown RightAligned>
                             <BarDropdownToggle>
-                                <img src="https://mdbcdn.b-cdn.net/img/new/avatars/1.webp" class="rounded-circle shadow-4"
-                                     style="width: 35px;" alt="Avatar" /> @context.User.Identity?.Name!
+                                
+                                @if (doesImageExistRemotely(GetAvatarPath(@context.User.Identity?.Name!)))
+                                {
+                                    <img src="@GetAvatarPath(@context.User.Identity?.Name!)" class="rounded-circle shadow-4" style="width: 35px;">
+                                }
+                                else
+                                {
+                                    <img src="https://mdbcdn.b-cdn.net/img/new/avatars/1.webp" class="rounded-circle shadow-4"
+                                         style="width: 35px;" alt="Avatar" />
+                                }
+
+                                 @context.User.Identity?.Name!
                             </BarDropdownToggle>
                             <BarDropdownMenu>
 
                                 <BarDropdownItem To="Identity/Account/Manage">
-                                    Manage
+                                    Manage Account
                                 </BarDropdownItem>
                                 <BarDropdownDivider />
-                                <BarDropdownItem >                        
-                                <form method="post" action="Identity/Account/Logout">
-                                        
-                                        
-                                        <Button Color="Color.Primary" Type="ButtonType.Submit"><Icon Name="IconName.Lock" Color="Color.Danger"></Icon> Logout</Button>
-                                </form>
+                                <BarDropdownItem>
+                                    <Button Color="Color.Primary" Clicked="@(e => ShowAvatarModal(context.User.Identity?.Name!))"> <Icon Name="IconName.Edit" Color="Color.Danger"></Icon> Edit Avatar</Button>
+                                </BarDropdownItem>
+                                <BarDropdownDivider />
+                                <BarDropdownItem>
+                                    <form method="post" action="Identity/Account/Logout">
+
+
+                                        <Button Color="Color.Danger" Type="ButtonType.Submit"><Icon Name="IconName.Lock" Color="Color.Danger"></Icon> Logout</Button>
+                                    </form>
                                 </BarDropdownItem>
                             </BarDropdownMenu>
                         </BarDropdown>
-                      
+
                     </BarItem>
-                  
+
                 </BarEnd>
             </BarMenu>
         </Bar>
@@ -40,13 +54,13 @@
     </Authorized>
     <NotAuthorized>
 
-                <Bar Breakpoint="Breakpoint.Desktop"
+        <Bar Breakpoint="Breakpoint.Desktop"
              Background="Background.Light"
              ThemeContrast="ThemeContrast.Light">
 
             <BarToggler />
             <BarMenu>
-               
+
                 <BarEnd>
 
                     <BarItem>
@@ -60,3 +74,40 @@
 
     </NotAuthorized>
 </AuthorizeView>
+
+@code {
+
+    [Inject] public IModalService ModalService { get; set; }
+    Task ShowAvatarModal(string userName)
+    {
+        ModalService.Show<AvatarModal>(parameters => parameters.Add(x => x.User, userName), new ModalInstanceOptions() { UseModalStructure = false });
+        return Task.CompletedTask;
+    }
+    public string GetAvatarPath(string userName)
+    {
+        return "https://gymavaiability.blob.core.windows.net/avatars/" + userName + ".png";
+    }
+    public bool doesImageExistRemotely(string uriToImage)
+    {
+        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uriToImage);
+        request.Method = "HEAD";
+
+        try
+        {
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch
+        {
+            return false;
+        }
+    }
+}

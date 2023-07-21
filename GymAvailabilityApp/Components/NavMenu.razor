@@ -1,30 +1,65 @@
-﻿<Bar Mode="BarMode.VerticalInline"
-     CollapseMode="BarCollapseMode.Small"
-     Breakpoint="Breakpoint.Desktop"
-     NavigationBreakpoint="Breakpoint.Tablet"
-     ThemeContrast="ThemeContrast.Dark">
-    <BarBrand>
-        <BarItem>
-            <BarLink To="">
-                <BarIcon IconName="IconName.Dumbbell" />
-                Test Gym
-            </BarLink>
-        </BarItem>
-    </BarBrand>
-    <BarMenu>
-        <BarStart>
-            <BarItem>
-                <BarLink To="gym">
-                    <BarIcon IconName="IconName.Dumbbell"/>
-                    Machine Availability
-                </BarLink>
-            </BarItem>
-            <BarItem>
-                <BarLink To="statistics">
-                    <BarIcon IconName="IconName.ChartPie" />
-                    Machine Statistics
-                </BarLink>
-            </BarItem>
-        </BarStart>
-    </BarMenu>
-</Bar>
+﻿
+<AuthorizeView Roles ="User">
+    <Authorized >
+        <Bar Mode="BarMode.VerticalInline"
+             CollapseMode="BarCollapseMode.Small"
+             Breakpoint="Breakpoint.Desktop"
+             NavigationBreakpoint="Breakpoint.Tablet"
+             ThemeContrast="ThemeContrast.Dark">
+            <BarBrand>
+                <BarItem>
+                    <BarLink To="">
+                        <BarIcon IconName="IconName.Dumbbell" />
+                        Test Gym
+                    </BarLink>
+                </BarItem>
+            </BarBrand>
+            <BarMenu>
+                <BarStart>
+                    <BarItem>
+                        <BarLink To="gym">
+                            <BarIcon IconName="IconName.Dumbbell" />
+                            Machine Availability
+                        </BarLink>
+                    </BarItem>
+                    <BarItem>
+                        <BarLink To="statistics">
+                            <BarIcon IconName="IconName.ChartPie" />
+                            Machine Statistics
+                        </BarLink>
+                    </BarItem>
+                    <AuthorizeView Roles="Employee" Context="innerContext">
+                      <BarItem>
+                        <BarLink To="manage">
+                            <BarIcon IconName="IconName.Dashboard" />
+                            Manage Gym
+                        </BarLink>
+                    </BarItem>  
+                    </AuthorizeView>
+                </BarStart>
+            </BarMenu>
+        </Bar>
+
+
+    </Authorized>
+    <NotAuthorized>
+        <Bar Mode="BarMode.VerticalInline"
+             CollapseMode="BarCollapseMode.Small"
+             Breakpoint="Breakpoint.Desktop"
+             NavigationBreakpoint="Breakpoint.Tablet"
+             ThemeContrast="ThemeContrast.Dark">
+            <BarBrand>
+                <BarItem>
+                    <BarLink To="">
+                        <BarIcon IconName="IconName.Dumbbell" />
+                        Test Gym
+                    </BarLink>
+                </BarItem>
+            </BarBrand>
+
+        </Bar>
+
+
+    </NotAuthorized>
+
+</AuthorizeView>

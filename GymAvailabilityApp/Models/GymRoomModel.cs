@@ -2,7 +2,7 @@
 {
     public class GymRoomModel
     {
-        public int? Id { get; set; }
+        public int Id { get; set; }
         public string? Name { get; set; }
         public string? Floor { get; set; }
         public string? RoomFileLink { get; set; }

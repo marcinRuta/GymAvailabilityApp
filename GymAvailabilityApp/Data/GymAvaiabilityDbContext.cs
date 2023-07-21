@@ -19,6 +19,7 @@ namespace GymAvailabilityApp.Data
             builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "User", NormalizedName = "USER", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
             builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Admin", NormalizedName = "ADMIN", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
             builder.Entity<IdentityRole>().HasData(new IdentityRole { Name = "Employee", NormalizedName = "EMPLOYEE", Id = Guid.NewGuid().ToString(), ConcurrencyStamp = Guid.NewGuid().ToString() });
+            builder.Entity<GymRoom>().ToTable(tb => tb.HasTrigger("UpdateDateTrigger"));
            
 
         }
@@ -28,7 +29,7 @@ namespace GymAvailabilityApp.Data
         public DbSet<Gym> Gyms { get; set; }
         public DbSet<GymRoom> GymRooms { get; set; }
         public DbSet<MachinePlacement> MachinePlacements { get; set; }
-        public DbSet<AvaiabilityReportFactSt> avaiabilityReportFactSts { get; set; }
+        public DbSet<AvaiabilityReportFactSt> AvaiabilityReportFactSt { get; set; }
 
     }
 }

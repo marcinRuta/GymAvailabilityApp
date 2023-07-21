@@ -4,10 +4,10 @@
     {
         public int Id { get; set; }
         public string Occupancy { get; set; }
-        public string Timestamp { get; set; }
+        public TimeSpan Timestamp { get; set; }
         public int MachineId { get; set; }
         public int GymRoomId { get; set; }
-        public string Date { get; set; }
+        public DateTime Date { get; set; }
 
     }
 }

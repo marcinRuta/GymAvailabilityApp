@@ -1,0 +1,102 @@
+﻿@inject IBlobStorageService BlobService
+@inject IModalService ModalService
+@inject IMachineService MachineService
+
+<ModalHeader>
+    <ModalTitle>Edit Gym Room Image</ModalTitle>
+    <CloseButton />
+</ModalHeader>
+<ModalBody MaxHeight="70">
+    Add a photo to the machine so that others can recognize it
+    @if (doesImageExistRemotely(GetAvatarPath(@MachineModel)))
+    {
+        <Container>
+            <img src="@GetAvatarPath(@MachineModel)" class="rounded-circle shadow-4" style="width: 250px;">
+        </Container>
+
+    }
+    else
+    {
+        
+    }
+
+    <Button Color="Color.Primary" Clicked="ShowAddingImageDialog" Block>Add Image</Button>
+    @if (addingImageDialog)
+    {
+        <Field>
+            <FilePicker Filter="image/png" Upload="OnFileUpload" ShowMode="FilePickerShowMode.List" />
+        </Field>
+
+    }
+
+
+</ModalBody>
+<ModalFooter>
+    <Button Color="Color.Danger" Clicked="Close">Close</Button>
+</ModalFooter>
+@code {
+
+    [Parameter] public MachineModel MachineModel { get; set; }
+
+    private async Task Close()
+    {
+        await ModalService.Hide();
+    }
+
+    private async Task Save()
+    {
+        await ModalService.Hide();
+    }
+    public string GetAvatarPath(MachineModel machineModel )
+    {
+        return "https://gymavaiability.blob.core.windows.net/machines-images/" + machineModel.Name + machineModel.Id + ".png";
+    }
+    public bool addingImageDialog = false;
+    public void ShowAddingImageDialog()
+    {
+        addingImageDialog = true;
+    }
+
+    public bool doesImageExistRemotely(string uriToImage)
+    {
+        HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uriToImage);
+        request.Method = "HEAD";
+
+        try
+        {
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+
+            if (response.StatusCode == HttpStatusCode.OK)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        catch
+        {
+            return false;
+        }
+    }
+    async Task OnFileUpload(FileUploadEventArgs e)
+    {
+        try
+        {
+            
+            string fileName = MachineModel.Name + MachineModel.Id + ".png";
+            var blobUrl = await BlobService.UploadFileToBlobAsync(fileName, e.File.Type, e.File.OpenReadStream(long.MaxValue), "machines-images");
+            MachineModel.ImageFileLink = blobUrl;
+            await MachineService.UpdateMachine(MachineModel);
+        }
+        catch (Exception exc)
+        {
+            Console.WriteLine(exc.Message);
+        }
+        finally
+        {
+            this.StateHasChanged();
+        }
+    }
+}
