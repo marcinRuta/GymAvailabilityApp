@@ -1,24 +1,34 @@
 ﻿
 
 <SfChart>
-    <ChartPrimaryXAxis LabelFormat="ymhms" ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime"  EdgeLabelPlacement="EdgeLabelPlacement.Shift" EnableAutoIntervalOnZooming="true">
+    <ChartPrimaryXAxis Interval="5" IntervalType="IntervalType.Minutes" LabelFormat="hh:mm" ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" EdgeLabelPlacement="EdgeLabelPlacement.Shift" EnableAutoIntervalOnZooming="true" LabelIntersectAction="LabelIntersectAction.Rotate90">
         <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
+        <ChartAxisCrosshairTooltip Enable="true"></ChartAxisCrosshairTooltip>
     </ChartPrimaryXAxis>
 
+    <ChartPrimaryYAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" LabelFormat="">
+        
+        <ChartMultiLevelLabels>
+            <ChartMultiLevelLabel >
+                <ChartCategories>
+                    <ChartCategory Start="-0.1" End="0.1" Text="Avaiable" MaximumTextWidth=50></ChartCategory>
+                    <ChartCategory Start="0.9" End="1.1" Text="Taken" MaximumTextWidth=50 ></ChartCategory>
+                </ChartCategories>
+            </ChartMultiLevelLabel>
+        </ChartMultiLevelLabels>
+    </ChartPrimaryYAxis>
 
-
-    <ChartZoomSettings EnableMouseWheelZooming="true" EnableScrollbar="true" EnablePinchZooming="true"
-                       EnableSelectionZooming="true"></ChartZoomSettings>
+    <ChartCrosshairSettings Enable="true"></ChartCrosshairSettings>
 
     <ChartSeriesCollection>
-        <ChartSeries DataSource="@DataPoints" XName="XValue" YName="YValue" />
+        <ChartSeries DataSource="@DataPoints" XName="XValue" YName="YValue" Type="ChartSeriesType.StepLine"  />
     </ChartSeriesCollection>
 </SfChart>
 @code {
     public class ChartData
     {
         public DateTime XValue { get; set; }
-        public int YValue { get; set; }
+        public string YValue { get; set; }
     }
 
     public List<ChartData> DataPoints;
@@ -34,15 +44,15 @@
 
         foreach (var item in avaiabilityReports)
         {
-
-            DataPoints.Add(new ChartData { XValue = (item.Date + item.Timestamp), YValue = (item.Occupancy == "true" ? 2 : 1) });
+            var category = (item.Occupancy == "True" ? 1 : 0);
+            DataPoints.Add(new ChartData { XValue = (item.Date + item.Timestamp), YValue =category.ToString() });
             //print string
-            Console.WriteLine(DataPoints.Last().YValue);
+           // Console.WriteLine(DataPoints.Last().YValue);
 
 
         };
        
-        Console.WriteLine(DataPoints.Count());
+        //Console.WriteLine(DataPoints.Count());
 
 
     }

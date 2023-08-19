@@ -78,6 +78,8 @@ else if (showNoDataMessage)
         if (statistics.Count != 0)
         {
             this.statistics = statistics;
+            showGraph = false;
+            InvokeAsync(StateHasChanged);
             showGraph = true;
             showNoDataMessage = false;
             InvokeAsync(StateHasChanged);
